@@ -148,7 +148,6 @@ var Map = module.exports = function(options) {
         '_onSourceUpdate',
         '_onWindowOnline',
         '_onWindowResize',
-        'onError',
         '_update',
         '_render'
     ], this);
@@ -190,11 +189,11 @@ var Map = module.exports = function(options) {
     if (options.style) this.setStyle(options.style);
     if (options.attributionControl) this.addControl(new Attribution(options.attributionControl));
 
-    this.on('error', this.onError);
-    this.on('style.error', this.onError);
-    this.on('source.error', this.onError);
-    this.on('tile.error', this.onError);
-    this.on('layer.error', this.onError);
+    var fireError = this.fire.bind(this, 'error');
+    this.on('style.error', fireError);
+    this.on('source.error', fireError);
+    this.on('tile.error', fireError);
+    this.on('layer.error', fireError);
 };
 
 util.extend(Map.prototype, Evented);
@@ -1001,23 +1000,6 @@ util.extend(Map.prototype, /** @lends Map.prototype */{
         removeNode(this._canvasContainer);
         removeNode(this._controlContainer);
         this._container.classList.remove('mapboxgl-map');
-    },
-
-    /**
-     * A default error handler for `style.error`, `source.error`, `layer.error`,
-     * and `tile.error` events.
-     * It logs the error via `console.error`.
-     *
-     * @example
-     * // Disable the default error handler
-     * map.off('error', map.onError);
-     * map.off('style.error', map.onError);
-     * map.off('source.error', map.onError);
-     * map.off('tile.error', map.onError);
-     * map.off('layer.error', map.onError);
-     */
-    onError: function(e) {
-        console.error(e.error);
     },
 
     _rerender: function() {
